@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista de Tarefas</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #6200ea, #000000);
+      color: #ffffff;
+    }
+
+    h1 {
+      margin-top: 30px;
+    }
+
+    .add-task {
+      margin: 20px 0;
+    }
+
+    .task-list {
+      list-style: none;
+      padding: 0;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      background-color: #ffffff;
+      padding: 8px;
+      border-radius: 4px;
+      color: #333333;
+    }
+
+    .task-text {
+      flex: 1;
+    }
+
+    .task-time {
+      font-size: 14px;
+      margin-left: 8px;
+      color: #666666;
+    }
+
+    .completed {
+      text-decoration: line-through;
+    }
+
+    .completed button {
+      display: none;
+    }
+
+    .completed button.delete-btn {
+      display: inline-block;
+      margin-left: 10px;
+      cursor: pointer;
+      color: #ff0000;
+      background: none;
+      border: none;
+    }
+
+    input[type="text"],
+    button {
+      font-family: 'Roboto', sans-serif;
+      font-size: 16px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      background-color: #ffffff;
+      color: #333333;
+    }
+
+    button {
+      margin-left: 10px;
+      cursor: pointer;
+    }
+
+    .instagram-link {
+      margin-top: 30px;
+      font-size: 16px;
+    }
+
+    .instagram-link a {
+      color: #ffffff;
+      text-decoration: none;
+    }
+
+    .instagram-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>Lista de Tarefas</h1>
+  <div class="add-task">
+    <input type="text" id="newTask" placeholder="Adicionar nova tarefa" onkeydown="handleKeyDown(event)">
+    <input type="text" id="newTime" placeholder="Horário (opcional)">
+    <button onclick="handleAddTask()">Adicionar</button>
+  </div>
+  <ul class="task-list" id="taskList">
+    <!-- Tarefas aqui (veja o código JavaScript) -->
+  </ul>
+
+  <script>
+    const taskList = document.getElementById('taskList');
+    const newTaskInput = document.getElementById('newTask');
+    const newTimeInput = document.getElementById('newTime');
+    let tasks = [];
+
+    function saveTasksToLocalStorage() {
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    function removeTask(taskId) {
+      tasks = tasks.filter((task) => task.id !== taskId);
+      saveTasksToLocalStorage();
+      renderTasks();
+    }
+
+    function renderTasks() {
+      taskList.innerHTML = '';
+      tasks.forEach((task) => {
+        const taskItem = document.createElement('li');
+        taskItem.classList.add('task-item');
+
+        const taskCheckbox = document.createElement('input');
+        taskCheckbox.type = 'checkbox';
+        taskCheckbox.checked = task.completed;
+        taskCheckbox.addEventListener('change', () => handleToggleTask(task.id));
+
+        const taskText = document.createElement('span');
+        taskText.classList.add('task-text');
+        taskText.textContent = task.text;
+
+        const taskTime = document.createElement('span');
+        taskTime.classList.add('task-time');
+        taskTime.textContent = task.time || '';
+
+        taskItem.appendChild(taskCheckbox);
+        taskItem.appendChild(taskText);
+        taskItem.appendChild(taskTime);
+
+        if (task.completed) {
+          taskText.classList.add('completed');
+
+          const deleteButton = document.createElement('button');
+          deleteButton.classList.add('delete-btn');
+          deleteButton.textContent = 'Excluir';
+          deleteButton.addEventListener('click', () => removeTask(task.id));
+          taskItem.appendChild(deleteButton);
+        }
+
+        taskList.appendChild(taskItem);
+      });
+    }
+
+    function handleAddTask() {
+      const newTaskText = newTaskInput.value.trim();
+      const newTaskTime = newTimeInput.value.trim();
+      if (newTaskText !== '') {
+        const newTaskItem = { id: Date.now(), text: newTaskText, time: newTaskTime, completed: false };
+        tasks.push(newTaskItem);
+        saveTasksToLocalStorage();
+        renderTasks();
+        newTaskInput.value = '';
+        newTimeInput.value = '';
+      }
+    }
+
+    function handleKeyDown(event) {
+      if (event.key === 'Enter') {
+        handleAddTask();
+      }
+    }
+
+    function handleToggleTask(taskId) {
+      tasks = tasks.map((task) =>
+        task.id === taskId ? { ...task, completed: !task.completed } : task
+      );
+      saveTasksToLocalStorage();
+      renderTasks();
+    }
+
+    function init() {
+      const savedTasks = localStorage.getItem('tasks');
+      if (savedTasks) {
+        tasks = JSON.parse(savedTasks);
+        renderTasks();
+      }
+    }
+
+    init();
+  </script>
+
+  <div class="instagram-link">
+    <p>Instagram: <a href="https://www.instagram.com/rafaeu.code/" target="_blank">@rafaeu.code</a></p>
+  </div>
+</body>
+</html>
